@@ -19,6 +19,7 @@ use App\Http\Requests\Contact\UpdateCustomerRequest;
 use App\Models\Contact;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ContactController extends Controller
 {
@@ -105,6 +106,7 @@ class ContactController extends Controller
      */
     public function update(UpdateCustomerRequest $request, Contact $contact)
     {
+        Log::debug($contact);
         $contact->update($request->validated());
         $contact->activities()->create([
             'user_id' => auth()->id(),
@@ -123,4 +125,21 @@ class ContactController extends Controller
         $contact->delete();
         return redirect()->route('contacts.index')->with('success', '已删除');
     }
+
+    public function indexByCustomer(Request $request, Customer $customer)
+    {
+        $search = $request->input('search');
+
+        $contacts = $customer->contacts()
+            ->when($search, function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            })
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('contacts.index_by_customer', compact('customer', 'contacts'));
+    }
+
 }

@@ -15,6 +15,8 @@
 
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DealController;
+use App\Http\Controllers\PipelineStageController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +34,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::resource('/customers', CustomerController::class);
     Route::resource('/contacts', ContactController::class);
+    Route::resource('/deals', DealController::class);
+    Route::patch('/deals/{deal}/stage', [DealController::class, 'updateStage'])
+        ->name('deals.updateStage');
+    Route::resource('/pipeline-stages', PipelineStageController::class);
+    Route::get('/customers/{customer}/contacts', [ContactController::class, 'indexByCustomer'])
+        ->name('customers.contacts.index');
+    Route::get('/customers/{customer}/deals', [DealController::class, 'indexByCustomer'])
+        ->name('customers.deals.index');
+
 });
 
 require __DIR__ . '/auth.php';

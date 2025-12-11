@@ -1,41 +1,25 @@
 <x-app-layout>
 
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('客户列表') }}
-            </h2>
+    <x-title :name="__('客户列表')"/>
 
-        </div>
-    </x-slot>
+    <x-main>
+        <x-tool-bar>
+            <x-button :href="route('customers.create')" title="新建客户"/>
 
-    <div class="overflow-x-auto mt-2">
-        <div class="m-2 flex justify-between">
-            <a href="{{ route('customers.create') }}"
-               class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded shadow">
-                新建客户
-            </a>
-            <form action="{{ route('customers.index') }}" method="GET" class="flex space-x-2">
-                <input type="text" name="search" value="{{ $search ?? '' }}"
-                       placeholder="搜索客户"
-                       class="px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button type="submit"
-                        class="px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600">
-                    搜索
-                </button>
-            </form>
-        </div>
+            <x-search-form :action="route('customers.index')" placeholder="搜索客户"/>
 
-        <table class="min-w-full border border-gray-200 bg-white shadow-sm rounded-lg overflow-hidden">
-            <thead class="bg-gray-100">
-            <tr>
-                <th class="px-6 py-3 text-left text-gray-700 uppercase text-sm font-medium">名称</th>
-                <th class="px-6 py-3 text-left text-gray-700 uppercase text-sm font-medium">公司</th>
-                <th class="px-6 py-3 text-left text-gray-700 uppercase text-sm font-medium">联系人数</th>
-                <th class="px-6 py-3 text-left text-gray-700 uppercase text-sm font-medium">商机数</th>
-                <th class="px-6 py-3 text-left text-gray-700 uppercase text-sm font-medium">操作</th>
-            </tr>
-            </thead>
+        </x-tool-bar>
+
+        <x-table>
+            <x-table-thead>
+                <tr>
+                    <x-table-th>名称</x-table-th>
+                    <x-table-th>公司</x-table-th>
+                    <x-table-th>联系人数</x-table-th>
+                    <x-table-th>商机数</x-table-th>
+                    <x-table-th>操作</x-table-th>
+                </tr>
+            </x-table-thead>
             <tbody class="divide-y divide-gray-200">
             @foreach($customers as $c)
                 <tr class="hover:bg-gray-50">
@@ -45,8 +29,17 @@
                         </a>
                     </td>
                     <td class="px-6 py-4">{{ $c->company ?? '-' }}</td>
-                    <td class="px-6 py-4">{{ $c->contacts()->count() }}</td>
-                    <td class="px-6 py-4">{{ $c->deals()->count() }}</td>
+                    <td class="px-6 py-4">
+                        <a href="{{ route('customers.contacts.index', $c->id) }}" class="text-blue-600 underline">
+                            {{ $c->contacts()->count() }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4">
+                        <a href="{{ route('customers.deals.index', $c->id) }}"
+                           class="text-blue-600 underline">
+                            {{ $c->deals()->count() }}
+                        </a>
+                    </td>
                     <td class="px-6 py-4 space-x-2">
                         <a href="{{ route('customers.edit', $c) }}"
                            class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm">编辑</a>
@@ -63,8 +56,9 @@
                 </tr>
             @endforeach
             </tbody>
-        </table>
-    </div>
+        </x-table>
+
+    </x-main>
 
     {{-- 分页 --}}
     <div class="mt-4">

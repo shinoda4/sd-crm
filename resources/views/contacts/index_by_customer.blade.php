@@ -4,7 +4,9 @@
     <x-main>
         <x-tool-bar>
             <x-button :href="route('contacts.create')" title="新建联系人"/>
-            <x-search-form :action="route('contacts.index')" placeholder="搜索联系人"/>
+            <x-search-form
+                :action="route('customers.contacts.index', $customer->id)"
+                placeholder="搜索联系人"/>
         </x-tool-bar>
 
         <table class="min-w-full border border-gray-200 bg-white shadow-sm rounded-lg overflow-hidden">
