@@ -15,11 +15,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Deal extends Model
 {
     //
+    use HasFactory;
     protected $fillable = ['title', 'customer_id', 'owner_id', 'pipeline_stage_id', 'amount', 'note'];
 
     public function customer()

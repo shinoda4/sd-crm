@@ -15,24 +15,73 @@
 
 namespace Database\Seeders;
 
+use App\Models\Activity;
+use App\Models\Contact;
+use App\Models\Customer;
+use App\Models\Deal;
+use App\Models\PipelineStage;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // 创建多个用户
+        $users = User::factory(3)->create()->each(function ($user, $index) {
+            $user->name = 'User' . ($index + 1);
+            $user->email = 'user' . ($index + 1) . '@example.com';
+            $user->password = bcrypt('1234567890'); // 默认密码
+            $user->save();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+            // 为每个用户创建 Pipeline Stages（全局也可以只创建一次）
+            $stages = ['初步接触', '需求分析', '方案设计', '报价', '成交'];
+            foreach ($stages as $sIndex => $name) {
+                PipelineStage::firstOrCreate(['name' => $name], ['order' => $sIndex]);
+            }
+
+            // 为每个用户创建客户
+            Customer::factory(3)->create()->each(function ($customer) use ($user) {
+                $customer->owner_id = $user->id;
+                $customer->save();
+
+                // 联系人
+                $contactCount = rand(1, 5);
+                Contact::factory($contactCount)->create([
+                    'customer_id' => $customer->id
+                ]);
+
+                // 随机数量的 Deals
+                $dealCount = rand(5, 15);
+                Deal::factory($dealCount)->create([
+                    'customer_id' => $customer->id,
+                    'owner_id' => $user->id,
+                    'pipeline_stage_id' => PipelineStage::inRandomOrder()->first()->id
+                ]);
+            });
+
+            // 创建活动
+            $activityCount = rand(3, 10);
+            Activity::factory($activityCount)->create([
+                'user_id' => $user->id,
+                'related_type' => function () {
+                    $types = [Customer::class, Contact::class, Deal::class];
+                    return $types[array_rand($types)];
+                },
+                'related_id' => function (array $attrs) {
+                    // 根据 related_type 随机选择一个 id
+                    if ($attrs['related_type'] === Customer::class) {
+                        return Customer::inRandomOrder()->first()->id;
+                    } elseif ($attrs['related_type'] === Contact::class) {
+                        return Contact::inRandomOrder()->first()->id;
+                    } else {
+                        return Deal::inRandomOrder()->first()->id;
+                    }
+                },
+                'type' => ['call', 'email', 'note'][array_rand(['call', 'email', 'note'])],
+                'content' => '模拟操作内容'
+            ]);
+
+        });
     }
 }
