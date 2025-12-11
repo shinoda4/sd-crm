@@ -58,4 +58,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function deals()
+    {
+        return $this->hasMany(Deal::class, 'owner_id');
+    }
 }
